@@ -2,6 +2,7 @@ import pygame
 
 from shapes import shapes, shape_colors
 from colors import WHITE, BLACK, BLUE, GREY
+from copy import deepcopy
 
 SCREEN_WIDTH = 400
 SCREEN_HEIGHT = 600
@@ -13,7 +14,11 @@ LINE_WIDTH = 1
 
 SQUARE_SIZE = 20
 
+TIME_LAPSE = 1 # Seconds
+
 FPS = 24
+
+LOOP_COUNTER = TIME_LAPSE * FPS
 
 """ 
 The `grid` object represent the current state of the TETRIS.
@@ -21,14 +26,24 @@ It is just a 2D array of colors.
 """
 
 class Piece():
-    def __init__(self, row, col, shape, color):
+    def __init__(self, row, col, shapes, color, current_shape = 0):
         self.row = row
         self.col = col
-        self.shape = shape
+        self.shapes = shapes
         self.color = color
+        self.current_shape = current_shape
 
-    def rotate(self, direction):
-        pass
+    def rotate_left(self):
+        self.current_shape = (self.current_shape - 1) % 4
+
+    def rotate_right(self):
+        self.current_shape = (self.current_shape + 1) % 4
+
+    def get_shape(self):
+        return self.shapes[self.current_shape]
+
+    def move_up(self):
+        self.row -= 1
 
     def move_down(self):
         self.row += 1
@@ -59,23 +74,25 @@ def draw_grid(screen, grid, offset_x = 0, offset_y = 0):
         pygame.draw.line(screen, GREY, [x, y1], [x, y2], LINE_WIDTH)
 
 def validate_configuration(grid, piece):
+    x = piece.col
+    y = piece.row
+    for (i, row) in enumerate(piece.get_shape()):
+        for (j, symb) in enumerate(row):
+            if symb == '#':
+                if y + i < 0 or y + i >= GRID_HEIGHT or x + j < 0 or x + j >= GRID_WIDTH:
+                    return False
     return True
 
 def update_grid(locked_grid, piece):
-    if not validate_configuration(locked_grid, piece):
-        return locked_grid, False
-
-    grid = locked_grid.copy()
+    grid = deepcopy(locked_grid)
 
     x = piece.col
     y = piece.row
-    for (i, shape_row) in enumerate(piece.shape):
-        print(shape_row)
-        for (j, symb) in enumerate(shape_row):
+    for (i, row) in enumerate(piece.get_shape()):
+        for (j, symb) in enumerate(row):
             if symb == '#':
                 grid[y + i][x + j] = piece.color
-
-    return grid, True
+    return grid
 
 def clear_rows(grid):
     pass
@@ -94,9 +111,10 @@ def main():
     """
     locked_grid = [[BLACK for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
 
-    piece = Piece(0, 2, shapes[1][0], shape_colors[0])
+    piece = Piece(10, 2, shapes[1], shape_colors[0], 0)
 
     running = True
+    counter = 1
 
     while running:
         for event in pygame.event.get():
@@ -105,12 +123,33 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
                     piece.move_right()
+                    if not validate_configuration(grid, piece):
+                        piece.move_left()
+                elif event.key == pygame.K_LEFT:
+                    piece.move_left()
+                    if not validate_configuration(grid, piece):
+                        piece.move_right()
+                elif event.key == pygame.K_UP:
+                    piece.rotate_left()
+                    if not validate_configuration(grid, piece):
+                        piece.rotate_right()
+                elif event.key == pygame.K_DOWN:
+                    piece.rotate_right()
+                    if not validate_configuration(grid, piece):
+                        piece.rotate_left()
+                    else:
+                        print("Is valid")
                     
+        if counter % LOOP_COUNTER == 0:
+            piece.move_down()
+            if not validate_configuration(grid, piece):
+                piece.move_up()
 
-        grid, updated = update_grid(locked_grid, piece)
+        grid = update_grid(locked_grid, piece)
        
         draw_grid(screen, grid, 70, 50)
 
+        counter += 1
         pygame.display.flip()
         clock.tick(FPS)
 
