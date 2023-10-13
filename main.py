@@ -6,8 +6,8 @@ from colors import WHITE, BLACK, BLUE, GREY
 from copy import deepcopy
 from grid import clear_rows
 
-SCREEN_WIDTH = 400
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 350
+SCREEN_HEIGHT = 500
 
 GRID_WIDTH = 10
 GRID_HEIGHT = 20
@@ -29,11 +29,19 @@ It is just a 2D array of colors.
 
 class Piece():
     def __init__(self, row, col, shape, current_shape = 0):
-        self.row = row
+        if row < 0:
+            self.row = -1 * self.get_max_height_of_shape(shape[current_shape])
+        else:
+            self.row = row
         self.col = col
         self.shapes = shape
         self.color = shape_colors[shapes.index(shape)]
         self.current_shape = current_shape
+
+    def get_max_height_of_shape(self, shape):
+        for (i, row) in enumerate(shape):
+            if row.count('.') != len(row):
+                return i
 
     def rotate_left(self):
         self.current_shape = (self.current_shape - 1) % 4
@@ -112,7 +120,7 @@ def main():
     """
     locked_grid = [[BLACK for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
 
-    piece = Piece(0, 2, random.choice(shapes), 0)
+    piece = Piece(-1, 2, random.choice(shapes), 0)
 
     running = True
     counter = 1
@@ -147,15 +155,18 @@ def main():
                     
         if counter % LOOP_COUNTER == 0:
             if activate_lock:
-                print("clearing rows")
-                grid = clear_rows(deepcopy(grid))
-                locked_grid = grid
-                piece = Piece(0, 2, random.choice(shapes), 0)
+                locked_grid = clear_rows(deepcopy(grid))
+                piece = Piece(-1, 2, random.choice(shapes), 0)
+                if not validate_configuration(locked_grid, piece):
+                    print("Game over")
+                    running = False
                 activate_lock = False
             piece.move_down()
             if not validate_configuration(locked_grid, piece):
                 piece.move_up()
                 activate_lock = True
+
+            # locked_grid = clear_rows(deepcopy(locked_grid))
 
         grid = update_grid(locked_grid, piece)
        

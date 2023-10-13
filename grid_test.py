@@ -9,9 +9,7 @@ def test_clear_rows_no_clear():
         [BLACK, BLACK],
         [BLACK, RED]
     ]
-
     result_grid = clear_rows(deepcopy(original_grid))
-
     assert result_grid == original_grid
 
 def test_clear_rows_1():
@@ -19,14 +17,11 @@ def test_clear_rows_1():
         [BLACK, BLACK],
         [GREEN, RED]
     ]
-
     expected_grid = [
         [BLACK, BLACK],
         [BLACK, BLACK]
     ]
-
     result_grid = clear_rows(deepcopy(original_grid))
-
     assert result_grid == expected_grid
 
 def test_clear_rows_2():
@@ -34,14 +29,11 @@ def test_clear_rows_2():
         [BLACK, RED],
         [GREEN, RED]
     ]
-
     expected_grid = [
         [BLACK, BLACK],
         [BLACK, RED]
     ]
-
     result_grid = clear_rows(deepcopy(original_grid))
-
     assert result_grid == expected_grid
 
 def test_clear_rows_3():
@@ -50,14 +42,25 @@ def test_clear_rows_3():
         [BLACK, RED],
         [GREEN, RED]
     ]
-
     expected_grid = [
         [BLACK, BLACK],
         [BLACK, BLACK],
         [BLACK, RED]
     ]
-
     result_grid = clear_rows(deepcopy(original_grid))
-    print("result grid", result_grid)
+    assert result_grid == expected_grid
 
+def test_clear_rows_4():
+    original_grid = [
+        [BLACK, BLACK],
+        [GREEN, RED],
+        [GREEN, RED]
+    ]
+    expected_grid = [
+        [BLACK, BLACK],
+        [BLACK, BLACK],
+        [BLACK, BLACK],
+    ]
+    result_grid = clear_rows(deepcopy(original_grid))
+    print(result_grid)
     assert result_grid == expected_grid
