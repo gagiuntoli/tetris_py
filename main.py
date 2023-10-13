@@ -4,6 +4,7 @@ import random
 from shapes import shapes, shape_colors
 from colors import WHITE, BLACK, BLUE, GREY
 from copy import deepcopy
+from grid import clear_rows
 
 SCREEN_WIDTH = 400
 SCREEN_HEIGHT = 600
@@ -97,9 +98,6 @@ def update_grid(locked_grid, piece):
                 grid[y + i][x + j] = piece.color
     return grid
 
-def clear_rows(grid):
-    pass
-
 def main():
     pygame.init()
     pygame.display.set_caption("TETRIS")
@@ -149,6 +147,8 @@ def main():
                     
         if counter % LOOP_COUNTER == 0:
             if activate_lock:
+                print("clearing rows")
+                grid = clear_rows(deepcopy(grid))
                 locked_grid = grid
                 piece = Piece(0, 2, random.choice(shapes), 0)
                 activate_lock = False
