@@ -119,6 +119,7 @@ def main():
     contain the moving piece, while the second contains it
     """
     locked_grid = [[BLACK for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+    grid = deepcopy(locked_grid)
 
     piece = Piece(-1, 2, random.choice(shapes), 0)
 
