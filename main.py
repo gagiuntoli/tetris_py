@@ -1,4 +1,5 @@
 import pygame
+import random
 
 from shapes import shapes, shape_colors
 from colors import WHITE, BLACK, BLUE, GREY
@@ -26,11 +27,11 @@ It is just a 2D array of colors.
 """
 
 class Piece():
-    def __init__(self, row, col, shapes, color, current_shape = 0):
+    def __init__(self, row, col, shape, current_shape = 0):
         self.row = row
         self.col = col
-        self.shapes = shapes
-        self.color = color
+        self.shapes = shape
+        self.color = shape_colors[shapes.index(shape)]
         self.current_shape = current_shape
 
     def rotate_left(self):
@@ -81,6 +82,8 @@ def validate_configuration(grid, piece):
             if symb == '#':
                 if y + i < 0 or y + i >= GRID_HEIGHT or x + j < 0 or x + j >= GRID_WIDTH:
                     return False
+                if grid[y + i][x + j] != BLACK:
+                    return False
     return True
 
 def update_grid(locked_grid, piece):
@@ -111,39 +114,48 @@ def main():
     """
     locked_grid = [[BLACK for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
 
-    piece = Piece(10, 2, shapes[1], shape_colors[0], 0)
+    piece = Piece(0, 2, random.choice(shapes), 0)
 
     running = True
     counter = 1
+    activate_lock = False
 
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    piece.move_right()
-                    if not validate_configuration(grid, piece):
-                        piece.move_left()
-                elif event.key == pygame.K_LEFT:
-                    piece.move_left()
-                    if not validate_configuration(grid, piece):
+                if not activate_lock:
+                    if event.key == pygame.K_RIGHT:
                         piece.move_right()
-                elif event.key == pygame.K_UP:
-                    piece.rotate_left()
-                    if not validate_configuration(grid, piece):
-                        piece.rotate_right()
-                elif event.key == pygame.K_DOWN:
-                    piece.rotate_right()
-                    if not validate_configuration(grid, piece):
+                        if not validate_configuration(locked_grid, piece):
+                            piece.move_left()
+                    elif event.key == pygame.K_LEFT:
+                        piece.move_left()
+                        if not validate_configuration(locked_grid, piece):
+                            piece.move_right()
+                    elif event.key == pygame.K_z:
                         piece.rotate_left()
-                    else:
-                        print("Is valid")
+                        if not validate_configuration(locked_grid, piece):
+                            piece.rotate_right()
+                    elif event.key == pygame.K_x:
+                        piece.rotate_right()
+                        if not validate_configuration(locked_grid, piece):
+                            piece.rotate_left()
+                    elif event.key == pygame.K_DOWN:
+                        piece.move_down()
+                        if not validate_configuration(locked_grid, piece):
+                            piece.move_up()
                     
         if counter % LOOP_COUNTER == 0:
+            if activate_lock:
+                locked_grid = grid
+                piece = Piece(0, 2, random.choice(shapes), 0)
+                activate_lock = False
             piece.move_down()
-            if not validate_configuration(grid, piece):
+            if not validate_configuration(locked_grid, piece):
                 piece.move_up()
+                activate_lock = True
 
         grid = update_grid(locked_grid, piece)
        
