@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 from shapes import shapes, shape_colors
 from colors import WHITE, BLACK, BLUE, GREY
@@ -16,11 +17,11 @@ LINE_WIDTH = 1
 
 SQUARE_SIZE = 20
 
-TIME_LAPSE = 1 # Seconds
+TIME_LAPSE = 0.5 # Seconds
 
 FPS = 24
 
-LOOP_COUNTER = TIME_LAPSE * FPS
+LOOP_COUNTER = math.floor(TIME_LAPSE * FPS)
 
 """ 
 The `grid` object represent the current state of the TETRIS.
@@ -160,14 +161,12 @@ def main():
                 piece = Piece(-1, 2, random.choice(shapes), 0)
                 if not validate_configuration(locked_grid, piece):
                     print("Game over")
-                    running = False
+                    break
                 activate_lock = False
             piece.move_down()
             if not validate_configuration(locked_grid, piece):
                 piece.move_up()
                 activate_lock = True
-
-            # locked_grid = clear_rows(deepcopy(locked_grid))
 
         grid = update_grid(locked_grid, piece)
        
