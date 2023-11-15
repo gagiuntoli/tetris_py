@@ -2,6 +2,8 @@
 
 A TETRIS implementation in Python
 
+![](./files/tetris_1.gif)
+
 # Run
 
 Using the dependencies on your machine (not guarantied to work)
